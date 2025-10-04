@@ -7074,3 +7074,72 @@ local args = {
 game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1RPNam1eTex1t"):FireServer(unpack(args))
   end
 })
+
+
+local Main = MakeTab({Name = "سكربتات من صنعي"})
+
+AddButton(Main, { 
+  Name = "اكتب السكربت", 
+  Callback = function() 
+local ClearEvent = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Clea1rTool1s")
+local ToolEvent = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Too1l")
+local FireEvent = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
+local attackEnabled = false
+local assaultThread = nil
+
+local function clearAllTools()
+    if ClearEvent then pcall(function() ClearEvent:FireServer("ClearAllTools") end) end
+end
+
+local function getAssault()
+    if ToolEvent then
+        local ok, _ = pcall(function() ToolEvent:InvokeServer("PickingTools","Assault") end)
+        return ok
+    end
+    return false
+end
+
+local function hasAssault()
+    return LocalPlayer and LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("Assault")
+end
+
+local function fireAtPart(targetPart)
+    if not FireEvent or not targetPart then return end
+    local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault") and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
+    if not gunScript then return end
+    local args={targetPart,targetPart,Vector3.new(1e14,1e14,1e14),targetPart.Position,gunScript:FindFirstChild("MuzzleEffect"),
+        gunScript:FindFirstChild("HitEffect"),0,0,{false},{25,Vector3.new(100,100,100),BrickColor.new(29),0.25,Enum.Material.SmoothPlastic,0.25},true,false}
+    pcall(function() FireEvent:FireServer(unpack(args)) end)
+end
+
+local function startAssaultLoop()
+    if assaultThread then return end
+    assaultThread = task.spawn(function()
+        local chatService = game:GetService("TextChatService")
+        if chatService and chatService.ChatVersion==Enum.ChatVersion.TextChatService then
+            local channel = chatService.TextChannels:FindFirstChild("RBXGeneral")
+            if channel then pcall(function() channel:SendAsync("Server: Hacked [🥶STR HUB🥶]") end) end
+        end
+        while attackEnabled do
+            clearAllTools()
+            getAssault()
+            repeat task.wait(0.2) until hasAssault() or not attackEnabled
+            for i=1,3 do
+                for _,plr in ipairs(Players:GetPlayers()) do
+                    if not attackEnabled then return end
+                    if plr~=LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                        pcall(function() fireAtPart(plr.Character.HumanoidRootPart) end)
+                        task.wait(0.1)
+                    end
+                end
+            end
+            task.wait(1)
+        end
+        assaultThread = nil
+    end)
+end
+
+AddButton(FreezeTab,{Name="تشغيل التجميد",Callback=function() attackEnabled=true; startAssaultLoop() end})
+AddButton(FreezeTab,{Name="ايقاف التجميد",Callback=function() attackEnabled=false end})
+  end 
+})
